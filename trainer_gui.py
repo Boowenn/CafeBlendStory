@@ -173,6 +173,12 @@ class TrainerApp:
         self.root.configure(bg="#1a1a2e")
         self.root.attributes("-topmost", True)
 
+        # Set icon
+        import os
+        icon_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "trainer.ico")
+        if os.path.exists(icon_path):
+            self.root.iconbitmap(icon_path)
+
         self._build_ui()
         self._start_hotkey_thread()
 
