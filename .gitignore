@@ -1,0 +1,20 @@
+# Game files
+*.dll
+*.exe
+*.assets
+*.resource
+*.resS
+KairoGames_Data/
+saves/
+baselib.dll
+UnityCrashHandler32.exe
+UnityPlayer.dll
+GameAssembly.dll
+KairoGames.exe
+
+# Python
+__pycache__/
+*.pyc
+
+# Claude
+.claude/
