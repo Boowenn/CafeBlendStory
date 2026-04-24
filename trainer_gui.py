@@ -11,7 +11,7 @@
   [F6] 饮品满属性      - 所有饮品属性999
   [F7] 料理满属性      - 所有料理属性999
   [F8] 套餐满属性      - 所有套餐属性999
-  [F9] 料理瞬间升级    - 料理经验需求为0
+  [F9] 物品魅力/品质999 - 家具桌子等摆放物品的魅力和品质为999
   [F10] 退出
 """
 
@@ -44,9 +44,13 @@ METHODS = {
     "MakeMenuData.GetParaSub":0x293370,
     "CookingMenuData.GetPara":0x264230,
     "CookingMenuData.GetParaSub": 0x2641C0,
+    "MasterFacility.GetQuality":    0x1893A0,
+    "MasterFacility.GetAtmosphere": 0x188F60,
+    "MasterTable.GetQuality":       0x18C290,
+    "MasterTable.GetAtmosphere":    0x18BE60,
+    "Building.GetAtmosphere":       0x179BC0,
     "SetMenuData.GetPara":    0x29A2F0,
     "SetMenuData.GetParaSub": 0x29A2A0,
-    "CookingMenuData.GetNextExp": 0x264140,
 }
 
 CHEATS = [
@@ -66,7 +70,9 @@ CHEATS = [
         "name": "无限研究点",
         "desc": "研究点数不会减少",
         "patches": [
-            (METHODS["SubPoint"], 0, b'\x55\x8B\xEC\x83\xEC', b'\xC3\x8B\xEC\x83\xEC'),
+            # NOP SubPoint中的减法: sub eax,[ebp+0C] 在 +0xBF, sbb edx,[ebp+10] 在 +0xC4
+            (METHODS["SubPoint"], 0xBF, b'\x2B\x45\x0C', b'\x90\x90\x90'),
+            (METHODS["SubPoint"], 0xC4, b'\x1B\x55\x10', b'\x90\x90\x90'),
         ],
     },
     {
@@ -143,12 +149,29 @@ CHEATS = [
     {
         "key": "F9",
         "vk": 0x78,
-        "name": "料理瞬间升级",
-        "desc": "料理升级所需经验为0",
+        "name": "物品魅力/品质999",
+        "desc": "家具、桌子等摆放物品的魅力和品质为999",
         "patches": [
-            (METHODS["CookingMenuData.GetNextExp"], 0,
-             b'\x55\x8B\xEC\x8B\x45\x08\x8B\x40\x78',
-             b'\x55\x8B\xEC\x33\xC0\x5D\xC3\x90\x90'),
+            # MasterFacility.GetQuality: return 999
+            (METHODS["MasterFacility.GetQuality"], 0,
+             b'\x55\x8B\xEC\x80\x3D\xF6\x02\xCF\x10\x00',
+             b'\x55\x8B\xEC\xB8\xE7\x03\x00\x00\x5D\xC3'),
+            # MasterFacility.GetAtmosphere: return 999
+            (METHODS["MasterFacility.GetAtmosphere"], 0,
+             b'\x55\x8B\xEC\x80\x3D\xF7\x02\xCF\x10\x00',
+             b'\x55\x8B\xEC\xB8\xE7\x03\x00\x00\x5D\xC3'),
+            # MasterTable.GetQuality: return 999
+            (METHODS["MasterTable.GetQuality"], 0,
+             b'\x55\x8B\xEC\x80\x3D\x18\x03\xCF\x10\x00',
+             b'\x55\x8B\xEC\xB8\xE7\x03\x00\x00\x5D\xC3'),
+            # MasterTable.GetAtmosphere: return 999
+            (METHODS["MasterTable.GetAtmosphere"], 0,
+             b'\x55\x8B\xEC\x80\x3D\x17\x03\xCF\x10\x00',
+             b'\x55\x8B\xEC\xB8\xE7\x03\x00\x00\x5D\xC3'),
+            # Building.GetAtmosphere: return 999
+            (METHODS["Building.GetAtmosphere"], 0,
+             b'\x55\x8B\xEC\x80\x3D\xCD\x02\xCF\x10\x00',
+             b'\x55\x8B\xEC\xB8\xE7\x03\x00\x00\x5D\xC3'),
         ],
     },
 ]

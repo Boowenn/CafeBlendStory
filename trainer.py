@@ -11,7 +11,7 @@
   [F6] 饮品满属性      - 所有饮品参数 = 999
   [F7] 料理满属性      - 所有料理参数 = 999
   [F8] 套餐满属性      - 所有套餐参数 = 999
-  [F9] 料理瞬间升级    - 升级经验需求为0
+  [F9] 物品魅力/品质999 - 家具桌子等摆放物品的魅力和品质为999
 
 用法: 先启动游戏，再运行本脚本。
       按F1-F9切换功能，按F10退出。
@@ -44,9 +44,13 @@ METHODS = {
     "MakeMenuData.GetParaSub":0x293370,
     "CookingMenuData.GetPara":0x264230,
     "CookingMenuData.GetParaSub": 0x2641C0,
+    "MasterFacility.GetQuality":    0x1893A0,
+    "MasterFacility.GetAtmosphere": 0x188F60,
+    "MasterTable.GetQuality":       0x18C290,
+    "MasterTable.GetAtmosphere":    0x18BE60,
+    "Building.GetAtmosphere":       0x179BC0,
     "SetMenuData.GetPara":    0x29A2F0,
     "SetMenuData.GetParaSub": 0x29A2A0,
-    "CookingMenuData.GetNextExp": 0x264140,
 }
 
 # ─── Patch Definitions ──────────────────────────────────────────────
@@ -54,32 +58,33 @@ METHODS = {
 
 PATCHES = {
     "F1": {
-        "name": "Infinite Money",
+        "name": "无限金钱",
         "patches": [
             (METHODS["SubMoney"], 10, b'\x2B\x45\x0C', b'\x90\x90\x90'),
             (METHODS["SubMoney"], 15, b'\x1B\x55\x10', b'\x90\x90\x90'),
         ],
     },
     "F2": {
-        "name": "Infinite Research Points",
+        "name": "无限研究点",
         "patches": [
-            (METHODS["SubPoint"], 0, b'\x55\x8B\xEC\x83\xEC', b'\xC3\x8B\xEC\x83\xEC'),
+            (METHODS["SubPoint"], 0xBF, b'\x2B\x45\x0C', b'\x90\x90\x90'),
+            (METHODS["SubPoint"], 0xC4, b'\x1B\x55\x10', b'\x90\x90\x90'),
         ],
     },
     "F3": {
-        "name": "Infinite Satisfaction",
+        "name": "无限满意度",
         "patches": [
             (METHODS["SubManzoku"], 0, b'\x55\x8B\xEC\x80\x3D', b'\xC3\x8B\xEC\x80\x3D'),
         ],
     },
     "F4": {
-        "name": "Free Staff Level Up",
+        "name": "免费员工升级",
         "patches": [
             (METHODS["GetLevelUpCost"], 3, b'\x8B\x45\x08\x6A', b'\x33\xC0\x5D\xC3'),
         ],
     },
     "F5": {
-        "name": "Staff 999 All Stats",
+        "name": "员工全属性999",
         "patches": [
             (METHODS["ClerkData.GetParameter"], 0,
              b'\x55\x8B\xEC\x8B\x4D\x08\x8B\x41\x44\x85',
@@ -87,7 +92,7 @@ PATCHES = {
         ],
     },
     "F6": {
-        "name": "Drink Max Stats",
+        "name": "饮品满属性",
         "patches": [
             (METHODS["MakeMenuData.GetPara"], 0,
              b'\x55\x8B\xEC\x80\x3D\xC8\x05\xCF\x10\x00',
@@ -98,7 +103,7 @@ PATCHES = {
         ],
     },
     "F7": {
-        "name": "Food Max Stats",
+        "name": "料理满属性",
         "patches": [
             (METHODS["CookingMenuData.GetPara"], 0,
              b'\x55\x8B\xEC\x8B\x45\x0C\x83\xF8\x01\x74',
@@ -109,7 +114,7 @@ PATCHES = {
         ],
     },
     "F8": {
-        "name": "Set Menu Max Stats",
+        "name": "套餐满属性",
         "patches": [
             (METHODS["SetMenuData.GetPara"], 0,
              b'\x55\x8B\xEC\x80\x3D\xE6\x05\xCF\x10\x00',
@@ -120,11 +125,23 @@ PATCHES = {
         ],
     },
     "F9": {
-        "name": "Food Instant Level Up",
+        "name": "物品魅力/品质999",
         "patches": [
-            (METHODS["CookingMenuData.GetNextExp"], 0,
-             b'\x55\x8B\xEC\x8B\x45\x08\x8B\x40\x78',
-             b'\x55\x8B\xEC\x33\xC0\x5D\xC3\x90\x90'),
+            (METHODS["MasterFacility.GetQuality"], 0,
+             b'\x55\x8B\xEC\x80\x3D\xF6\x02\xCF\x10\x00',
+             b'\x55\x8B\xEC\xB8\xE7\x03\x00\x00\x5D\xC3'),
+            (METHODS["MasterFacility.GetAtmosphere"], 0,
+             b'\x55\x8B\xEC\x80\x3D\xF7\x02\xCF\x10\x00',
+             b'\x55\x8B\xEC\xB8\xE7\x03\x00\x00\x5D\xC3'),
+            (METHODS["MasterTable.GetQuality"], 0,
+             b'\x55\x8B\xEC\x80\x3D\x18\x03\xCF\x10\x00',
+             b'\x55\x8B\xEC\xB8\xE7\x03\x00\x00\x5D\xC3'),
+            (METHODS["MasterTable.GetAtmosphere"], 0,
+             b'\x55\x8B\xEC\x80\x3D\x17\x03\xCF\x10\x00',
+             b'\x55\x8B\xEC\xB8\xE7\x03\x00\x00\x5D\xC3'),
+            (METHODS["Building.GetAtmosphere"], 0,
+             b'\x55\x8B\xEC\x80\x3D\xCD\x02\xCF\x10\x00',
+             b'\x55\x8B\xEC\xB8\xE7\x03\x00\x00\x5D\xC3'),
         ],
     },
 }
