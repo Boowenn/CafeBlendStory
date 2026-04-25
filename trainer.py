@@ -12,9 +12,11 @@
   [F7] 料理满属性      - 所有料理参数 = 999
   [F8] 套餐满属性      - 所有套餐参数 = 999
   [F9] 物品魅力/品质999 - 家具桌子等摆放物品的魅力和品质为999
+  [F10] 料理瞬间升级    - 料理经验需求为0
+  [F11] 免费合成/开发    - 合成开发不消耗材料费用
 
 用法: 先启动游戏，再运行本脚本。
-      按F1-F9切换功能，按F10退出。
+      按F1-F11切换功能，按F12退出。
 """
 
 import ctypes
@@ -51,6 +53,9 @@ METHODS = {
     "Building.GetAtmosphere":       0x179BC0,
     "SetMenuData.GetPara":    0x29A2F0,
     "SetMenuData.GetParaSub": 0x29A2A0,
+    "CookingMenuData.GetNextExp": 0x264140,
+    "SubForm.GetIngrediensCost": 0x230D30,
+    "AppData.GetComposeCost": 0x2C7EF0,
 }
 
 # ─── Patch Definitions ──────────────────────────────────────────────
@@ -144,6 +149,25 @@ PATCHES = {
              b'\x55\x8B\xEC\xB8\xE7\x03\x00\x00\x5D\xC3'),
         ],
     },
+    "F10": {
+        "name": "料理瞬间升级",
+        "patches": [
+            (METHODS["CookingMenuData.GetNextExp"], 0,
+             b'\x55\x8B\xEC\x8B\x45\x08\x8B\x40\x78\x83',
+             b'\x55\x8B\xEC\x33\xC0\x5D\xC3\x90\x90\x90'),
+        ],
+    },
+    "F11": {
+        "name": "免费合成/开发",
+        "patches": [
+            (METHODS["SubForm.GetIngrediensCost"], 0,
+             b'\x55\x8B\xEC\x83\xEC\x10\x80\x3D\x66\x03',
+             b'\x55\x8B\xEC\x33\xC0\x5D\xC3\x90\x90\x90'),
+            (METHODS["AppData.GetComposeCost"], 0,
+             b'\x55\x8B\xEC\x83\xEC\x08\x80\x3D\x03\x07',
+             b'\x55\x8B\xEC\x33\xC0\x5D\xC3\x90\x90\x90'),
+        ],
+    },
 }
 
 # ─── Virtual Key Codes ──────────────────────────────────────────────
@@ -157,6 +181,8 @@ VK_F7  = 0x76
 VK_F8  = 0x77
 VK_F9  = 0x78
 VK_F10 = 0x79
+VK_F11 = 0x7A
+VK_F12 = 0x7B
 
 KEY_MAP = {
     VK_F1: "F1",
@@ -168,6 +194,8 @@ KEY_MAP = {
     VK_F7: "F7",
     VK_F8: "F8",
     VK_F9: "F9",
+    VK_F10: "F10",
+    VK_F11: "F11",
 }
 
 GetAsyncKeyState = ctypes.windll.user32.GetAsyncKeyState
@@ -258,19 +286,19 @@ class Trainer:
         for key_code, key_name in KEY_MAP.items():
             if key_name in PATCHES:
                 print(f"  {key_name} - {PATCHES[key_name]['name']}")
-        print(f"  F10 - 退出修改器")
+        print(f"  F12 - 退出修改器")
         print()
 
         prev_state = {vk: False for vk in KEY_MAP}
-        prev_f10 = False
+        prev_f12 = False
 
         try:
             while True:
-                # Check F10 (exit)
-                f10_down = bool(GetAsyncKeyState(VK_F10) & 0x8000)
-                if f10_down and not prev_f10:
+                # Check F12 (exit)
+                f12_down = bool(GetAsyncKeyState(VK_F12) & 0x8000)
+                if f12_down and not prev_f12:
                     break
-                prev_f10 = f10_down
+                prev_f12 = f12_down
 
                 # Check toggle keys
                 for vk, key_name in KEY_MAP.items():

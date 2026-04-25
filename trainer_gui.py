@@ -12,7 +12,9 @@
   [F7] 料理满属性      - 所有料理属性999
   [F8] 套餐满属性      - 所有套餐属性999
   [F9] 物品魅力/品质999 - 家具桌子等摆放物品的魅力和品质为999
-  [F10] 退出
+  [F10] 料理瞬间升级    - 料理经验需求为0
+  [F11] 免费合成/开发    - 合成开发不消耗材料费用
+  [F12] 退出
 """
 
 import ctypes
@@ -51,6 +53,10 @@ METHODS = {
     "Building.GetAtmosphere":       0x179BC0,
     "SetMenuData.GetPara":    0x29A2F0,
     "SetMenuData.GetParaSub": 0x29A2A0,
+    "CookingMenuData.GetNextExp": 0x264140,
+    "SubForm.GetIngrediensCost": 0x230D30,
+    "Food.GetComposeExp":     0x26CB50,
+    "AppData.GetComposeCost": 0x2C7EF0,
 }
 
 CHEATS = [
@@ -174,12 +180,39 @@ CHEATS = [
              b'\x55\x8B\xEC\xB8\xE7\x03\x00\x00\x5D\xC3'),
         ],
     },
+    {
+        "key": "F10",
+        "vk": 0x79,
+        "name": "料理瞬间升级",
+        "desc": "料理升级所需经验为0，立即满级",
+        "patches": [
+            (METHODS["CookingMenuData.GetNextExp"], 0,
+             b'\x55\x8B\xEC\x8B\x45\x08\x8B\x40\x78\x83',
+             b'\x55\x8B\xEC\x33\xC0\x5D\xC3\x90\x90\x90'),
+        ],
+    },
+    {
+        "key": "F11",
+        "vk": 0x7A,
+        "name": "免费合成/开发",
+        "desc": "合成和开发食材不消耗材料和费用",
+        "patches": [
+            # SubForm.GetIngrediensCost: return 0
+            (METHODS["SubForm.GetIngrediensCost"], 0,
+             b'\x55\x8B\xEC\x83\xEC\x10\x80\x3D\x66\x03',
+             b'\x55\x8B\xEC\x33\xC0\x5D\xC3\x90\x90\x90'),
+            # AppData.GetComposeCost: return 0
+            (METHODS["AppData.GetComposeCost"], 0,
+             b'\x55\x8B\xEC\x83\xEC\x08\x80\x3D\x03\x07',
+             b'\x55\x8B\xEC\x33\xC0\x5D\xC3\x90\x90\x90'),
+        ],
+    },
 ]
 
 GetAsyncKeyState = ctypes.windll.user32.GetAsyncKeyState
 GetAsyncKeyState.argtypes = [ctypes.c_int]
 GetAsyncKeyState.restype = ctypes.wintypes.SHORT
-VK_F10 = 0x79
+VK_F12 = 0x7B
 
 
 class TrainerApp:
@@ -263,7 +296,7 @@ class TrainerApp:
 
         # Footer
         footer = tk.Label(
-            self.root, text="F10 = 退出  |  游戏版本 v1.32",
+            self.root, text="F12 = 退出  |  游戏版本 v1.32",
             font=("Microsoft YaHei", 8), fg="#444444", bg="#1a1a2e"
         )
         footer.pack(pady=(10, 8))
@@ -310,7 +343,7 @@ class TrainerApp:
         for key, (btn, _) in self.buttons.items():
             btn.configure(state="normal", fg="#e0e0e0")
 
-        messagebox.showinfo("成功", "已成功连接到游戏！\n使用F1-F9切换功能，F10退出。")
+        messagebox.showinfo("成功", "已成功连接到游戏！\n使用F1-F11切换功能，F12退出。")
 
     def toggle(self, key):
         if not self.attached:
@@ -341,13 +374,13 @@ class TrainerApp:
     def _start_hotkey_thread(self):
         def monitor():
             prev = {c["vk"]: False for c in CHEATS}
-            prev[VK_F10] = False
+            prev[VK_F12] = False
             while self.running:
                 # F10 = exit
-                f10 = bool(GetAsyncKeyState(VK_F10) & 0x8000)
-                if f10 and not prev[VK_F10]:
+                f10 = bool(GetAsyncKeyState(VK_F12) & 0x8000)
+                if f10 and not prev[VK_F12]:
                     self.root.after(0, self.on_close)
-                prev[VK_F10] = f10
+                prev[VK_F12] = f10
 
                 if self.attached:
                     for cheat in CHEATS:
